@@ -35,7 +35,7 @@ public class loadImg {
 	static final int maxWidth = 100;
 	static final int expectedHeight = 280;
 	static final int blur = 10;
-	static final int expectedHeightWidthRatio = 5;
+	static final double expectedHeightWidthRatio = 4.23;
 	static Rect targetRect; 
 	
 	public static void main(String[] args) throws IOException {
@@ -133,9 +133,9 @@ public class loadImg {
 		targetRect = null;
 		for (MatOfPoint contour : contours) {
 			Rect rect = Imgproc.boundingRect(contour);
-			if (rect.area() > filterAreaSize && rect.width < maxWidth && Math.abs(rect.height - expectedHeight) < currentDifference) {
+			if (rect.area() > filterAreaSize && rect.width < maxWidth && Math.abs((rect.height/rect.width) - expectedHeightWidthRatio) < currentDifference) {
 				targetRect = rect;
-				currentDifference = Math.abs(rect.height - expectedHeight);
+				currentDifference = Math.abs((rect.height/rect.width) - expectedHeightWidthRatio);
 			}
 			// System.out.println("Contour X-Pos: " + contour.);
 		}
