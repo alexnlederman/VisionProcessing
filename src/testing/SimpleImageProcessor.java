@@ -8,8 +8,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 public class SimpleImageProcessor implements ImageProcessor {
 	
@@ -22,21 +22,23 @@ public class SimpleImageProcessor implements ImageProcessor {
 	double maxWidth;
 	double minHeight;
 	double maxHeight;
+	List<Rect> bestRects;
 	static final int exposureInt = 15;
 	
 	Mat filteredColorImg;
 	
 	List<BestRectFinder> brfs;
 	
-	static final double[] hue = { 45, 85 };
-	static final double[] saturation = { 225, 300 };
-	static final double[] luminance = { 70, 225 };
-	static final int defaultMinArea = 300;
-	static final int defaultMaxArea = 19999;
-	static final int defaultMinWidth = 50;
-	static final int defaultMaxWidth = 199999;
-	static final int defaultMinHeight = 50;
-	static final int defaultMaxHeight = 99999;
+	static final double[] hue = { 60, 90 };
+	static final double[] saturation = { 100, 280 };
+	static final double[] luminance = { 40, 120 };
+	static final int defaultMinArea = 10;
+	static final int defaultMaxArea = 199999;
+	static final int defaultMinWidth = 5;
+	static final int defaultMaxWidth = 1999999;
+	static final int defaultMinHeight = 10;
+	static final int defaultMaxHeight = 999999;
+	
 	
 	public SimpleImageProcessor(VideoCapture camera, List<BestRectFinder> brf, double minArea, double maxArea, double minWidth, double maxWidth, double minHeight, double maxHeight) {
 		this.camera = camera;
@@ -48,7 +50,7 @@ public class SimpleImageProcessor implements ImageProcessor {
 		this.minHeight = minHeight;
 		this.maxHeight = maxHeight;
 		filteredColorImg = new Mat();
-		this.camera.set(exposureInt, -8);
+		
 	}
 	
 	public SimpleImageProcessor(VideoCapture camera, List<BestRectFinder> brf) {
@@ -63,11 +65,12 @@ public class SimpleImageProcessor implements ImageProcessor {
 		List<MatOfPoint> contours = getContours(img);
 		List<Rect> rects = getRectsFromContours(contours);
 		List<Rect> filteredRects = filterRects(rects);
-		List<Rect> bestRects = findBestRect(filteredRects);
+		this.bestRects = findBestRect(filteredRects);
 		resetBRFs();
 		for (Rect bestRect : bestRects) {
 			if (bestRect != null) {
-				Core.rectangle(img, bestRect.tl(), bestRect.br(), new Scalar(255, 255, 255));
+				
+				Imgproc.rectangle(img, bestRect.tl(), bestRect.br(), new Scalar(255, 255, 255));
 			}
 		}
 		return img;
@@ -77,6 +80,10 @@ public class SimpleImageProcessor implements ImageProcessor {
 		for (BestRectFinder brf : brfs) {
 			brf.resetRect();
 		}
+	}
+	
+	public List<Rect> getBestRects() {
+		return bestRects;
 	}
 	
 	public Mat getFilteredImg() {
