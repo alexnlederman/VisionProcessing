@@ -1,6 +1,5 @@
 package testing;
 
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class loadImg {
 	static final int expectedHeight = 280;
 	static final int CAMERA_WIDTH = 640;
 	static final double SET_LENGTH = 10.5;
-	static final double CAMERA_OFFSET = 15;
+	static final double CAMERA_OFFSET = 10;
 	static SimpleImageProcessor sameCameraImgPro;
 	static List<Rect> bestRects;
 	// static SimpleImageProcessor rightImgPro;
@@ -69,6 +68,10 @@ public class loadImg {
 		// JFrame filteredFrame = displayMat(sameCameraImgPro.getFilteredImg());
 		// JFrame imageFrame = displayMat(sameCameraImgPro.getCameraFrame());
 
+		boolean onLeft;
+
+		Triangle triangle = new Triangle(0, 0);
+
 		while (System.in.available() == 0) {
 			// img = getVideoFrame(video);
 			// updateVideoStream(img, imgFrame);
@@ -95,17 +98,59 @@ public class loadImg {
 			// updateVideoStream(filteredImg, filteredFrame);
 			// updateVideoStream(sameCameraImgPro.getCameraFrame(), imageFrame);
 			if (bestRects.get(0) != null && bestRects.get(0) != null) {
-//				getWidthRatio(bestRects.get(0), bestRects.get(1));
-//				newTheta(getAngle(bestRects.get(0), bestRects.get(1)),
-//						distanceFromTarget(bestRects.get(0), bestRects.get(1)));
-//				System.out.println("Offset: " + getAngle(bestRects.get(0), bestRects.get(1)));
-//				System.out.println(
-//						"Offset Distance: " + getOffsetDistance(distanceFromTarget(bestRects.get(0), bestRects.get(1)),
-//								getAngleForReal(bestRects.get(0), bestRects.get(1))));
+				// getWidthRatio(bestRects.get(0), bestRects.get(1));
+				// newTheta(getAngle(bestRects.get(0), bestRects.get(1)),
+				// distanceFromTarget(bestRects.get(0), bestRects.get(1)));
+				// System.out.println("Offset: " + getAngle(bestRects.get(0),
+				// bestRects.get(1)));
+				// System.out.println(
+				// "Offset Distance: " +
+				// getOffsetDistance(distanceFromTarget(bestRects.get(0),
+				// bestRects.get(1)),
+				// getAngleForReal(bestRects.get(0), bestRects.get(1))));
 				// System.out.println("Length Between: " +
 				// getLengthBetweenRects(bestRects.get(0), bestRects.get(1)));
-				System.out.println("Angle: " + (90 + getAngleForReal(bestRects.get(0), bestRects.get(1))));
-//				System.out.println("Angle For Real: " + (getAngleForReal(bestRects.get(0), bestRects.get(1)) + getAngle(bestRects.get(0), bestRects.get(1))));
+
+				triangle.setHypLength(distanceFromTarget(bestRects.get(0), bestRects.get(1)));
+				triangle.setAngleC(getAngle(bestRects.get(0), bestRects.get(1)));
+				System.out.println("OG Hyp Length: " + triangle.getHypLength());
+
+				if (bestRects.get(0).area() > bestRects.get(1).area()) {
+					onLeft = true;
+				} else {
+					onLeft = false;
+				}
+				
+				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft);
+				System.out.println("Offset Hyp: " + triangle.getHypLength());
+				System.out.println("Offset Angle: " + Math.toDegrees(triangle.getAngleC()));
+				System.out.println("Offset Angle Test: " + getOffsetAngle(triangle.getHypLength(), getAngleForReal(bestRects.get(0), bestRects.get(1)), getAngle(bestRects.get(0), bestRects.get(1)), bestRects.get(0), bestRects.get(1)));
+
+				// triangle.shortenTriangle(SET_LENGTH);
+				// System.out.println("Shortened Hyp: " +
+				// triangle.getHypLength());
+
+				// System.out.println("Height: " +
+				// getHeightPixels(bestRects.get(0), bestRects.get(1)));
+
+				// System.out.println("Angle: " + (90 +
+				// getAngleForReal(bestRects.get(0), bestRects.get(1))));
+				// System.out.println(
+				// "Offset Distance: " +
+				// getOffsetDistance(distanceFromTarget(bestRects.get(0),
+				// bestRects.get(1)),
+				// getAngleForReal(bestRects.get(0), bestRects.get(1))));
+				// // angleToTarget(bestRects.get(0), bestRects.get(1));
+//				System.out.println("Offset Angle: " + getOffsetAngle(
+//						getOffsetDistance(distanceFromTarget(bestRects.get(0), bestRects.get(1)),
+//								getAngleForReal(bestRects.get(0), bestRects.get(1))),
+//						getAngleForReal(bestRects.get(0), bestRects.get(1)),
+//						getAngle(bestRects.get(0), bestRects.get(1)), bestRects.get(0), bestRects.get(1)));
+				// // System.out.println("Offset Angle: " +
+				// getOffsetAngle(distanceFromTarget));
+				// System.out.println("Angle For Real: " +
+				// (getAngleForReal(bestRects.get(0), bestRects.get(1)) +
+				// getAngle(bestRects.get(0), bestRects.get(1))));
 				// System.out.println("Angle Offset To Goal: " +
 				// getAngleOffset(bestRects.get(0), bestRects.get(1)));
 				// System.out.println("Angle Towards Goal: " +
@@ -122,9 +167,16 @@ public class loadImg {
 		}
 	}
 
+	public static double getHeightPixels(Rect left, Rect right) {
+		if (left.height > right.height) {
+			return left.height;
+		}
+		return right.height;
+	}
+
 	public static double distanceFromTarget(Rect left, Rect right) {
 		// distance costant divided by length between centers of contours
-		// double leftCenter = left.x + (left.width / 2);index
+		// double leftCenter = left.x + (left.width / 2554.3);index
 		// double rightCenter = right.x + (right.width / 2);
 		// double lengthBetweenRects = Math.abs(leftCenter - rightCenter);
 		double rectHeight;
@@ -133,7 +185,7 @@ public class loadImg {
 		} else {
 			rectHeight = right.height;
 		}
-		double distanceFromTarget = 3375 / rectHeight;
+		double distanceFromTarget = 3297 / rectHeight;
 		double OFFSET_TO_FRONT = 0;
 		return distanceFromTarget - OFFSET_TO_FRONT;
 	}
@@ -170,7 +222,7 @@ public class loadImg {
 
 	// public static Mat drawContours(List<MatOfPoint> contours, Mat img) {
 	// Scalar color = new Scalar(255, 255, 0, 0);index
-	//
+	// getOffsetDistance
 	// smallItems = new ArrayList<Rect>();
 	// bigItems = new ArrayList<Rect>();
 	//
@@ -197,12 +249,13 @@ public class loadImg {
 	// System.out.println("Rect Width: " + targetRect.width);
 	// Core.rectangle(img, targetRect.tl(), targetRect.br(), color);
 	// }
-	// return img;
+	// return img;a)
 	// }
 
-	public static Mat filterHSLFrame(Mat img, double[] hue, double[] saturation, double[] luminance) {
+	public static Mat filterHSangleToTargetLFrame(Mat img, double[] hue, double[] saturation, double[] luminance) {
 		Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2HLS);
-		Core.inRange(img, new Scalar(hue[0], luminance[0], saturation[0]), new Scalar(hue[1], luminance[1], saturation[1]), img);
+		Core.inRange(img, new Scalar(hue[0], luminance[0], saturation[0]),
+				new Scalar(hue[1], luminance[1], saturation[1]), img);
 		return img;
 	}
 
@@ -261,7 +314,8 @@ public class loadImg {
 	public static double getAngleOffset(Rect left, Rect right) {
 		double angleToGoal = 0;
 		if (left != null && right != null) {
-			// distance costant divided by length between centers of contours
+			// distance costan anglet divided by length between centers of
+			// contours
 			double leftCenter = left.x + (left.width / 2);
 			double rightCenter = right.x + (right.width / 2);
 			// 8.5in is for the distance from cent to center from goal,
@@ -270,7 +324,7 @@ public class loadImg {
 			double constant = 8.5 / Math.abs(leftCenter - rightCenter);
 			// Looking for the 2 blocks to actually start trig
 			// this calculates the distance from the center of goal to
-			// center of webcam
+			// center of webcam554.3
 			double distanceFromCenterPixels = ((leftCenter + rightCenter) / 2) - (CAMERA_WIDTH / 2);
 			// Converts pixels to inches using the constant from above.
 			double distanceFromCenterInch = distanceFromCenterPixels * constant;
@@ -290,9 +344,9 @@ public class loadImg {
 		} else {
 			height = right.height;
 		}
-		double conversionFactor = 5 / height;
-		double width = conversionFactor * getLengthBetweenRects(left, right);
-		double anglePercent = width / 8.5;
+		double conversionFactor = (double) 5 / height;
+		double width = (double) conversionFactor * getLengthBetweenRects(left, right);
+		double anglePercent = (double) width / 8.5;
 
 		// if (leftCenter < rightCenter) {
 		// rightCenter = CAMERA_WIDTH - rightCenter;
@@ -301,9 +355,15 @@ public class loadImg {
 		// leftCenter = CAMERA_WIDTH - leftCenter;
 		// }
 
-		if (anglePercent > 89.99) {
-			return 90;
+		// if (anglePercent > 89.99) {
+		// return 90;
+		// }
+
+		if (anglePercent >= 1) {
+			anglePercent = 1;
 		}
+		// System.out.println("Real Angle: " +
+		// Math.toDegrees(Math.asin(anglePercent)));
 		return Math.toDegrees(Math.asin(anglePercent));
 	}
 
@@ -340,41 +400,57 @@ public class loadImg {
 		} else {
 			rightCenter = CAMERA_WIDTH - rightCenter;
 		}
-//		System.out.println("Half Width: " + ((double) CAMERA_WIDTH / 2));
-		
+		// System.out.println("Half Width: " + ((double) CAMERA_WIDTH / 2));
+
 		System.out.println("Angle: " + 90 * leftCenter / rightCenter);
 		return 90 * leftCenter / rightCenter;
 	}
 
 	public static double getOffsetDistance(double distance, double angle) {
-		double hypLength = Math.sqrt(
-				Math.pow(distance, 2) + Math.pow(CAMERA_OFFSET, 2) - (2 * distance * CAMERA_OFFSET * Math.cos(angle)));
+		System.out.println("Distance: " + distance);
+		System.out.println("Angle: " + Math.toRadians(angle));
+		double hypLength = Math.sqrt(Math.pow(distance, 2) + Math.pow(CAMERA_OFFSET, 2)
+				- (2 * distance * CAMERA_OFFSET * Math.cos(Math.toRadians(angle))));
 		System.out.println("New Offset Hyp Length: " + hypLength);
 		return hypLength;
 	}
 
-	public static double getOffsetAngle(double hypLength, double robotAngle, double angleDirection) {
-		double newAngle = Math.toDegrees(Math.asin((CAMERA_OFFSET * Math.sin(robotAngle)) / hypLength));
-		double adjustedAngle = angleDirection - newAngle;
+	public static double getOffsetAngle(double hypLength, double robotAngle, double angleDirection, Rect left,
+			Rect right) {
+		System.out.println("Angle Direction: " + angleDirection);
+		System.out.println("Robot Angle: " + Math.toRadians(robotAngle));
+		System.out.println("Sin Math: " + Math.sin(Math.toRadians(robotAngle)));
+		System.out.println(
+				"Math: " + Math.toDegrees(Math.asin(CAMERA_OFFSET * Math.sin(Math.toRadians(robotAngle)) / hypLength)));
+		double newAngle = Math.toDegrees(Math.asin(CAMERA_OFFSET * Math.sin(Math.toRadians(robotAngle)) / hypLength));
+
+		double adjustedAngle;
+		if (left.area() > right.area()) {
+			adjustedAngle = angleDirection - newAngle;
+		} else {
+			adjustedAngle = angleDirection + newAngle;
+		}
 		System.out.println("New Offset Angle: " + adjustedAngle);
 		return adjustedAngle;
 	}
-	
+
 	public static double getAngleForReal(Rect left, Rect right) {
 		double leftCenter = left.x + (left.width / 2);
 		double rightCenter = right.x + (right.width / 2);
-		
+
 		double centerCenter = ((leftCenter + rightCenter) / 2) - CAMERA_WIDTH / 2;
 		double centerOffset = centerCenter / CAMERA_WIDTH;
 		double angle = Math.toDegrees(Math.asin(2 * centerOffset * Math.tan(Math.toRadians(30))));
-		return angle;
+		return angle + 90;
 	}
-	
-	public static double angleToTarger(Rect left, Rect right) {
+
+	public static double angleToTarget(Rect left, Rect right) {
 		double leftCenter = left.x + (left.width / 2);
 		double rightCenter = right.x + (right.width / 2);
 		double center = (leftCenter + rightCenter) / 2;
 		double centerOfImage = (CAMERA_WIDTH / 2) - 0.5;
-		Math.atan(())
+		double degrees = Math.toDegrees(Math.atan((center - centerOfImage) / 554.255971188));
+		System.out.println("Degrees: " + (90 + degrees));
+		return 90 + degrees;
 	}
 }
