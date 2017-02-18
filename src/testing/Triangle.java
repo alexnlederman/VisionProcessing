@@ -5,22 +5,22 @@ public class Triangle {
 	// Peg
 	// |\
 	// |b\
-	// | \
-	// | \
-	// | \Hyp
-	// Adj| \
-	// | \
-	// | \
+	// |  \
+	// |   \
+	// |	\Hyp
+	// Adj	 \
+	// | 	  \
+	// |	   \
 	// |a______c\
 	// Opp Camera
 
-	double hypLength;
-	double oppLength;
-	double adjLength;
+	private double hypLength;
+	private double oppLength;
+	private double adjLength;
 
-	double angleB;
-	double angleC;
-	double angleA;
+	private double angleB;
+	private double angleC;
+	private double angleA;
 
 	public Triangle(double hypLength, double angleC) {
 		this.hypLength = hypLength;
@@ -30,8 +30,8 @@ public class Triangle {
 	}
 
 	private void recalculateAngles() {
-		this.angleA = 1.5707;
-		this.angleB = 1.5707 - angleC;
+		this.angleA = Math.toRadians(90);
+		this.angleB = Math.toRadians(90) - Math.abs(angleC);
 
 		this.oppLength = Math.sin(angleB) * hypLength;
 		this.adjLength = Math.cos(angleB) * hypLength;
@@ -50,6 +50,7 @@ public class Triangle {
 		if (robotAngle > 90) {
 			robotAngle = robotAngle - ((robotAngle - 90) * 2);
 		}
+
 		robotAngle = Math.toRadians(robotAngle);
 		double hypLength = Math.sqrt(Math.pow(this.hypLength, 2) + Math.pow(offset, 2)
 				- (2 * this.hypLength * offset * Math.cos(robotAngle)));
@@ -61,15 +62,14 @@ public class Triangle {
 		// Math.cos(robotAngle))));
 		double newAngle = Math.asin(offset * Math.sin(robotAngle) / hypLength);
 
-		System.out.println("Angle B: " + Math.toDegrees(this.angleB));
-		double adjustedAngle;
-		if (!onRight) {
-			adjustedAngle = this.angleB + newAngle;
-		} else {
-			adjustedAngle = this.angleB - newAngle;
-		}
-		System.out.println("Adjusted Angle: " + Math.toRadians(adjustedAngle));
-		this.angleC = 90 - adjustedAngle;
+		double adjustedAngle = Math.toRadians(90) - Math.abs(newAngle);
+		System.out.println("Adjusted Angle: " + Math.toDegrees(newAngle));
+//		if (!onRight) {
+//			adjustedAngle = this.angleB + newAngle;
+//		} else {
+//			adjustedAngle = this.angleB - newAngle;
+//		}
+		this.angleC = Math.toRadians(90) - adjustedAngle;
 		this.hypLength = hypLength;
 		recalculateAngles();
 	}
@@ -102,6 +102,6 @@ public class Triangle {
 	}
 
 	public double getAngleC() {
-		return angleC;
+		return Math.toDegrees(angleC);
 	}
 }

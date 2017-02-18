@@ -113,18 +113,20 @@ public class loadImg {
 
 				triangle.setHypLength(distanceFromTarget(bestRects.get(0), bestRects.get(1)));
 				triangle.setAngleC(getAngle(bestRects.get(0), bestRects.get(1)));
-				System.out.println("OG Hyp Length: " + triangle.getHypLength());
 
-				if (bestRects.get(0).area() > bestRects.get(1).area()) {
+				if (bestRects.get(0).area() > bestRects.get(1).area() || triangle.getOppLength() < CAMERA_OFFSET) {
 					onLeft = true;
 				} else {
 					onLeft = false;
 				}
 				
 				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft);
-				System.out.println("Offset Hyp: " + triangle.getHypLength());
-				System.out.println("Offset Angle: " + Math.toDegrees(triangle.getAngleC()));
-				System.out.println("Offset Angle Test: " + getOffsetAngle(triangle.getHypLength(), getAngleForReal(bestRects.get(0), bestRects.get(1)), getAngle(bestRects.get(0), bestRects.get(1)), bestRects.get(0), bestRects.get(1)));
+//				System.out.println("Offset Hyp: " + triangle.getHypLength());
+				System.out.println("Pre-Angle: " + triangle.getAngleC());
+				triangle.shortenTriangle(SET_LENGTH);
+				System.out.println("Hyp Length: " + triangle.getHypLength());
+				System.out.println("Angle: " + triangle.getAngleC());
+//				System.out.println("Offset Angle Test: " + getOffsetAngle(triangle.getHypLength(), getAngleForReal(bestRects.get(0), bestRects.get(1)), getAngle(bestRects.get(0), bestRects.get(1)), bestRects.get(0), bestRects.get(1)));
 
 				// triangle.shortenTriangle(SET_LENGTH);
 				// System.out.println("Shortened Hyp: " +
@@ -185,15 +187,24 @@ public class loadImg {
 		} else {
 			rectHeight = right.height;
 		}
-		double distanceFromTarget = 3297 / rectHeight;
+//		3297
+		double distanceFromTarget = 3329.5 / rectHeight;
 		double OFFSET_TO_FRONT = 0;
 		return distanceFromTarget - OFFSET_TO_FRONT;
 	}
 
 	public static double getLengthBetweenRects(Rect left, Rect right) {
-		double leftCenter = left.x + (left.width / 2);
-		double rightCenter = right.x + (right.width / 2);
-		double lengthBetweenRects = Math.abs(leftCenter - rightCenter);
+		double leftX = 0;
+		double rightX = 0;
+		if (left.x < right.x) {
+			leftX = left.x;
+			right.x = right.x + right.width;
+		}
+		else {
+			rightX = right.x;
+			left.x = left.x + left.width;
+		}
+		double lengthBetweenRects = Math.abs(leftX - rightX);
 		return lengthBetweenRects;
 	}
 
@@ -346,7 +357,7 @@ public class loadImg {
 		}
 		double conversionFactor = (double) 5 / height;
 		double width = (double) conversionFactor * getLengthBetweenRects(left, right);
-		double anglePercent = (double) width / 8.5;
+		double anglePercent = (double) width / 10.5;
 
 		// if (leftCenter < rightCenter) {
 		// rightCenter = CAMERA_WIDTH - rightCenter;
