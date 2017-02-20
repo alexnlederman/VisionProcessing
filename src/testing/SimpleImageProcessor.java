@@ -29,9 +29,9 @@ public class SimpleImageProcessor implements ImageProcessor {
 	
 	List<BestRectFinder> brfs;
 	
-	static final double[] hue = { 60, 90 };
-	static final double[] saturation = { 100, 280 };
-	static final double[] luminance = { 40, 120 };
+	static final double[] hue = { 40, 110 };
+	static final double[] saturation = { 80, 300 };
+	static final double[] luminance = { 20, 140 };
 	static final int defaultMinArea = 10;
 	static final int defaultMaxArea = 199999;
 	static final int defaultMinWidth = 5;

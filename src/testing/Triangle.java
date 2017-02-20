@@ -46,10 +46,16 @@ public class Triangle {
 		recalculateAngles();
 	}
 
-	public void offsetTriangle(double offset, double robotAngle, boolean onRight) {
+	public void offsetTriangle(double offset, double robotAngle, boolean onRight, double getAngleThing) {
 		if (robotAngle > 90) {
+			System.out.println("Adjusted: " + robotAngle);
 			robotAngle = robotAngle - ((robotAngle - 90) * 2);
 		}
+		
+		
+		
+		
+		// New Line
 
 		robotAngle = Math.toRadians(robotAngle);
 		double hypLength = Math.sqrt(Math.pow(this.hypLength, 2) + Math.pow(offset, 2)
@@ -71,6 +77,7 @@ public class Triangle {
 //		}
 		this.angleC = Math.toRadians(90) - adjustedAngle;
 		this.hypLength = hypLength;
+		System.out.println("Angle C Offset: " + Math.toDegrees(this.angleC));
 		recalculateAngles();
 	}
 
