@@ -184,14 +184,14 @@ public class loadImg {
 				System.out.println("Offset Distance: " + offsetDistance);
 				System.out.println("Camera Offset: " + CAMERA_OFFSET);
 				System.out.println("Offset Angle: " + Math.toRadians(offsetAngle));
-				double centerDistance = Math.sqrt(Math.pow(offsetDistance, 2) + Math.pow(CAMERA_OFFSET, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));
-//				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));
+				double centerDistance = Math.sqrt(Math.pow(offsetDistance, 2) + Math.pow(CAMERA_OFFSET, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));																					
+//				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));					
 //				double centerDistance = Math.sqrt(Math.pow(CAMERA_OFFSET, 2) + Math.pow(offsetDistance, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));
-				System.out.println("Center Distance: " + centerDistance);
+				System.out.println("Center Distance: " + centerDistance);																																	
 				double centerAngleOffset = Math.toRadians(90) + Math.asin((offsetDistance * Math.sin(offsetAngle)) / centerDistance);
 				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
 				
-				double angle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;
+				double angle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;																														
 				System.out.println("Angle: " + Math.toDegrees(angle));
 				double centerPegAngleOffset = Math.asin((Math.sin(angle) * 10) / centerDistance);
 				double centerPegAngle = offsetPegAngle - centerPegAngleOffset;
@@ -199,7 +199,7 @@ public class loadImg {
 				table.putNumber("Timestamp", timeStamp);
 				table.putNumber("Adjustment Anlge", centerPegAngleOffset);
 				table.putNumber("Distance", centerDistance);
-				table.putNumber("Peg Adjustment Angle", centerPegAngle);
+				table.putNumber("Peg Adjustment Angle", centerPegAngle);																																																																																				
 				
 //				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft, 20);
 //				centerAngleOffset += (Math.toRadians(triangle.getAngleC())) - Math.toRadians(90);
