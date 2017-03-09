@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -85,6 +86,7 @@ public class loadImg {
 		double offsetAngle;
 		double thirdAngle;
 		double offsetPegAngle;
+		long timeStamp;
 		
 		
 		while (System.in.available() == 0) {
@@ -104,6 +106,7 @@ public class loadImg {
 			// }
 			System.out.println("FPS: " + (1000 / ((System.currentTimeMillis() - adjustment) / totalFrames)));
 			totalFrames++;
+			timeStamp = new Date().getTime();
 			rightImg = sameCameraImgPro.processImage();
 			// leftImg = rightImgPro.processImage();
 			// filteredImg = sameCameraImgPro.getFilteredImg();
@@ -128,16 +131,16 @@ public class loadImg {
 				// System.out.println("Length Between: " +
 				// getLengthBetweenRects(bestRects.get(0), bestRects.get(1)));
 				
-				System.out.println("Angle: " + getAngle(bestRects.get(0), bestRects.get(1)));
-				
-				triangle.setHypLength(distanceFromTarget(bestRects.get(0), bestRects.get(1)));
-				triangle.setAngleC(getAngle(bestRects.get(0), bestRects.get(1)));
-
-				if (bestRects.get(0).area() > bestRects.get(1).area() || triangle.getOppLength() < CAMERA_OFFSET) {
-					onLeft = true;
-				} else {
-					onLeft = false;
-				}
+//				System.out.println("Angle: " + getAngle(bestRects.get(0), bestRects.get(1)));
+//				
+//				triangle.setHypLength(distanceFromTarget(bestRects.get(0), bestRects.get(1)));
+//				triangle.setAngleC(getAngle(bestRects.get(0), bestRects.get(1)));
+//
+//				if (bestRects.get(0).area() > bestRects.get(1).area() || triangle.getOppLength() < CAMERA_OFFSET) {
+//					onLeft = true;
+//				} else {
+//					onLeft = false;
+//				}
 
 //				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft, 20);
 				// System.out.println("Offset Hyp: " + triangle.getHypLength());
@@ -161,13 +164,13 @@ public class loadImg {
 				
 				cameraDistance = distanceFromTarget(bestRects.get(0), bestRects.get(1));
 				pegAngle = Math.toRadians(90) - Math.toRadians(getAngle(bestRects.get(0), bestRects.get(1)));
-				System.out.println(pegAngle);
+//				System.out.println(pegAngle);
 				offsetDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(cameraDistance, 2) - 2 * SET_LENGTH * cameraDistance * Math.cos(pegAngle));
-				System.out.println("Offset Distance: " + offsetDistance);
+//				System.out.println("Offset Distance: " + offsetDistance);
 				offsetAngleOffset = Math.asin((SET_LENGTH * Math.sin(pegAngle)) / offsetDistance);
-				System.out.println("Angle For Real: " + getAngleForReal(bestRects.get(0), bestRects.get(1)));
-				offsetAngle = Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;
-				System.out.println("Offset Angle: " + Math.toDegrees(offsetAngle));
+//				System.out.println("Angle For Real: " + getAngleForReal(bestRects.get(0), bestRects.get(1)));
+				offsetAngle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;
+//				System.out.println("Offset Angle: " + Math.toDegrees(offsetAngle));
 				thirdAngle = (Math.toRadians(180) - pegAngle) - offsetAngleOffset;
 				offsetPegAngle = Math.toRadians(180) - thirdAngle;
 				// Omega is cameraDistance
@@ -175,18 +178,34 @@ public class loadImg {
 				// angleC = 90 - angleZ
 				// centerDistance is lengthX
 				
-				System.out.println("Offset Peg Angle: " + Math.toDegrees(offsetPegAngle));
-				System.out.println("Standard Peg Angle: " + Math.toDegrees(pegAngle));
-				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));
+//				System.out.println("Offset Peg Angle: " + Math.toDegrees(offsetPegAngle));
+//				System.out.println("Standard Peg Angle: " + Math.toDegrees(pegAngle));
+//				System.out.println("Offset Angle: " + Math.toDegrees(offsetAngle));
+				System.out.println("Offset Distance: " + offsetDistance);
+				System.out.println("Camera Offset: " + CAMERA_OFFSET);
+				System.out.println("Offset Angle: " + Math.toRadians(offsetAngle));
+				double centerDistance = Math.sqrt(Math.pow(offsetDistance, 2) + Math.pow(CAMERA_OFFSET, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));
+//				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));
 //				double centerDistance = Math.sqrt(Math.pow(CAMERA_OFFSET, 2) + Math.pow(offsetDistance, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));
 				System.out.println("Center Distance: " + centerDistance);
-				double centerAngleOffset = Math.asin((offsetDistance * Math.sin(offsetAngle)) / centerDistance);
+				double centerAngleOffset = Math.toRadians(90) + Math.asin((offsetDistance * Math.sin(offsetAngle)) / centerDistance);
+				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
+				
+				double angle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;
+				System.out.println("Angle: " + Math.toDegrees(angle));
+				double centerPegAngleOffset = Math.asin((Math.sin(angle) * 10) / centerDistance);
+				double centerPegAngle = offsetPegAngle - centerPegAngleOffset;
+				System.out.println("Peg Adjustment Angle: " + Math.toDegrees(centerPegAngle));
+				table.putNumber("Timestamp", timeStamp);
+				table.putNumber("Adjustment Anlge", centerPegAngleOffset);
+				table.putNumber("Distance", centerDistance);
+				table.putNumber("Peg Adjustment Angle", centerPegAngle);
 				
 //				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft, 20);
 //				centerAngleOffset += (Math.toRadians(triangle.getAngleC())) - Math.toRadians(90);
-				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
+//				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
 
-//				System.out.println("Angle C: " + cameraAngleOffset);
+//				System.out.println("Angle C: " + cameraAngleOffset);angdeg)
 				
 //				adjustmentAngle = cameraAngleOffset;
 ////				if (!onLeft) {
