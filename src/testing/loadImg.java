@@ -35,8 +35,9 @@ public class loadImg {
 	static final int expectedHeight = 280;
 	static final int CAMERA_WIDTH = 640;
 	// TODO set this to correct length
+	static final double ROBOT_HALF_LENGTH = 15;
 	static final double SET_LENGTH = 12;
-	static final double CAMERA_OFFSET = 10;
+	static final double CAMERA_OFFSET = 9; //TODO IMPORTANT this is the incorrect length for the actual robot IMPORTANT
 	static SimpleImageProcessor sameCameraImgPro;
 	static List<Rect> bestRects;
 	static double totalFrames = 0;
@@ -46,7 +47,7 @@ public class loadImg {
 	// static SimpleImageProcessor rightImgPro;
 
 	public static void main(String[] args) throws IOException {
-		System.out.println(System.getProperty("java.library.path"));
+//		System.out.println(System.getProperty("java.library.path"));
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		Runtime.getRuntime().exec("v4l2-ctl -c exposure_auto=1 -c exposure_absolute=2");
@@ -55,11 +56,12 @@ public class loadImg {
 		brfs.add(new LeftMostRectFinder());
 		brfs.add(new rightMostRectFinder());
 		NetworkTable.setClientMode();
+		NetworkTable.setTeam(5940);
 		NetworkTable table = NetworkTable.getTable("Vision");
-
-		table.putNumber("Test Value", 8);
-		System.out.println(table.getNumber("Test Value", 0));
-		System.out.println("Connected: " + table.isConnected());
+		
+//		table.putNumber("Test Value", 8);
+//		System.out.println(table.getNumber("Test Value", 0));
+//		System.out.println("Connected: " + table.isConnected());
 
 		sameCameraImgPro = new SimpleImageProcessor(new VideoCapture(0), brfs);
 		// rightImgPro = new SimpleImageProcessor(new VideoCapture(0), new
@@ -73,10 +75,6 @@ public class loadImg {
 		JFrame rightImgFrame = displayMat(rightImg);
 		// JFrame filteredFrame = displayMat(sameCameraImgPro.getFilteredImg());
 		// JFrame imageFrame = displayMat(sameCameraImgPro.getCameraFrame());
-
-		boolean onLeft;
-
-		Triangle triangle = new Triangle(0, 0);
 
 		adjustment = System.currentTimeMillis() - 1;
 		double cameraDistance;
@@ -106,7 +104,7 @@ public class loadImg {
 			// }
 			System.out.println("FPS: " + (1000 / ((System.currentTimeMillis() - adjustment) / totalFrames)));
 			totalFrames++;
-			timeStamp = new Date().getTime();
+			timeStamp = System.currentTimeMillis();
 			rightImg = sameCameraImgPro.processImage();
 			// leftImg = rightImgPro.processImage();
 			// filteredImg = sameCameraImgPro.getFilteredImg();
@@ -117,7 +115,8 @@ public class loadImg {
 			// updateVideoStream(leftImg, leftImgFrame);
 			// updateVideoStream(filteredImg, filteredFrame);
 			// updateVideoStream(sameCameraImgPro.getCameraFrame(), imageFrame);
-			if (bestRects.get(0) != null && bestRects.get(0) != null) {
+			if (bestRects.get(0) != null && bestRects.get(1) != null) {
+				System.out.println("Angle For Real: " + getAngle(bestRects.get(0), bestRects.get(1)));
 //				offsetAngleOffset	// getWidthRatio(bestRects.get(0), bestRects.get(1));
 				// newTheta(getAngle(bestRects.get(0), bestRects.get(1)),
 				// distanceFromTarget(bestRects.get(0), bestRects.get(1)));
@@ -163,6 +162,8 @@ public class loadImg {
 //				System.out.println("Camera Offset: " + Math.toDegrees(cameraAngleOffset));
 				
 				cameraDistance = distanceFromTarget(bestRects.get(0), bestRects.get(1));
+				System.out.println("DISTANCE: " + cameraDistance);
+				System.out.println("ANGLE: " + getAngle(bestRects.get(0), bestRects.get(1)));
 				pegAngle = Math.toRadians(90) - Math.toRadians(getAngle(bestRects.get(0), bestRects.get(1)));
 //				System.out.println(pegAngle);
 				offsetDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(cameraDistance, 2) - 2 * SET_LENGTH * cameraDistance * Math.cos(pegAngle));
@@ -181,25 +182,42 @@ public class loadImg {
 //				System.out.println("Offset Peg Angle: " + Math.toDegrees(offsetPegAngle));
 //				System.out.println("Standard Peg Angle: " + Math.toDegrees(pegAngle));
 //				System.out.println("Offset Angle: " + Math.toDegrees(offsetAngle));
-				System.out.println("Offset Distance: " + offsetDistance);
-				System.out.println("Camera Offset: " + CAMERA_OFFSET);
-				System.out.println("Offset Angle: " + Math.toRadians(offsetAngle));
+//				System.out.println("Offset Distance: " + offsetDistance);
+//				System.out.println("Camera Offset: " + CAMERA_OFFSET);
+//				System.out.println("Offset Angle: " + Math.toRadians(offsetAngle));
 				double centerDistance = Math.sqrt(Math.pow(offsetDistance, 2) + Math.pow(CAMERA_OFFSET, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));																					
-//				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));					
+//				double centerDistance = Math.sqrt(Math.pow(SET_LENGTH, 2) + Math.pow(offsetDistance, 2) - 2 * SET_LENGTH * offsetDistance * Math.cos(offsetPegAngle));	
 //				double centerDistance = Math.sqrt(Math.pow(CAMERA_OFFSET, 2) + Math.pow(offsetDistance, 2) - 2 * CAMERA_OFFSET * offsetDistance * Math.cos(offsetAngle));
-				System.out.println("Center Distance: " + centerDistance);																																	
-				double centerAngleOffset = Math.toRadians(90) + Math.asin((offsetDistance * Math.sin(offsetAngle)) / centerDistance);
-				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
+//				System.out.println("Center Distance: " + centerDistance);																																	
+				double centerAngleOffset = Math.toRadians(90) - Math.asin((offsetDistance * Math.sin(offsetAngle)) / centerDistance);
+//				System.out.println("Center Angle Offset: " + Math.toDegrees(centerAngleOffset));
 				
-				double angle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;																														
-				System.out.println("Angle: " + Math.toDegrees(angle));
+				double angle = Math.toRadians(90) + Math.toRadians(getAngleForReal(bestRects.get(0), bestRects.get(1))) - offsetAngleOffset;
 				double centerPegAngleOffset = Math.asin((Math.sin(angle) * 10) / centerDistance);
 				double centerPegAngle = offsetPegAngle - centerPegAngleOffset;
+				
+				double offsetAngleSupplement = Math.toRadians(180) - centerAngleOffset;
+				double centerCenterDistance = Math.sqrt(Math.pow(centerDistance, 2) + Math.pow(ROBOT_HALF_LENGTH, 2) - (2 * centerDistance * ROBOT_HALF_LENGTH * Math.cos(offsetAngleSupplement))); // TODO
+				double centerCenterAngle = Math.asin((centerDistance * Math.sin(offsetAngleSupplement)) / centerCenterDistance);
+				double finalDistance = centerCenterDistance - ROBOT_HALF_LENGTH;
+				
+				System.out.println("CENTER CENTER ANGLE: " + Math.toDegrees(centerCenterAngle));
+				System.out.println("FINAL DISTANCE: " + finalDistance);
+				
+				
 				System.out.println("Peg Adjustment Angle: " + Math.toDegrees(centerPegAngle));
-				table.putNumber("Timestamp", timeStamp);
-				table.putNumber("Adjustment Anlge", centerPegAngleOffset);
-				table.putNumber("Distance", centerDistance);
-				table.putNumber("Peg Adjustment Angle", centerPegAngle);																																																																																				
+				if (Math.toDegrees(angle) > 90) {
+					centerCenterAngle = -centerCenterAngle;
+					//centerPegAngle = -centerPegAngle;
+				}
+				table.putNumber("timestamp", timeStamp);
+				table.putNumber("angle", centerCenterAngle);
+				table.putNumber("distance", finalDistance);
+				table.putNumber("peg angle", centerPegAngle);
+//				System.out.println("Center: " + Math.toDegrees(centerAngleOffset));
+//				System.out.println("Adjustment Angle: " + Math.toDegrees(centerPegAngleOffset));
+//				System.out.println("Distance: " + centerDistance);
+//				System.out.println("Peg Adjustment Angle: " + Math.toDegrees(centerPegAngle));
 				
 //				triangle.offsetTriangle(CAMERA_OFFSET, getAngleForReal(bestRects.get(0), bestRects.get(1)), onLeft, 20);
 //				centerAngleOffset += (Math.toRadians(triangle.getAngleC())) - Math.toRadians(90);
@@ -208,18 +226,17 @@ public class loadImg {
 //				System.out.println("Angle C: " + cameraAngleOffset);angdeg)
 				
 //				adjustmentAngle = cameraAngleOffset;
-////				if (!onLeft) {
+////				if (!onLeft) { 
 ////					adjustmentAngle += (90 - triangle.getAngleC());
 ////				}
 ////				else {
 //					adjustmentAngle -= (triangle.getAngleC());
 //				}
-				System.out.println("Adjustment Angle: " + adjustmentAngle);
+//				System.out.println("Adjustment Angle: " + adjustmentAngle);
 //				System.out.println("Angle For Real: " + getAngleForReal(bestRects.get(0), bestRects.get(1)));
 //				System.out.println("Angle To Target: " + angleToTarget(bestRects.get(0), bestRects.get(1)));
-				
+				  
 //				System.out.println("Adjustment Angle: " + adjustmentAngle);
-				
 				// System.o				if (false) {
 //ut.println("Offset Angle Test: " +
 				// getOffsetAngle(triangle.getHypLength(),
@@ -289,7 +306,7 @@ public class loadImg {
 			rectHeight = right.height;
 		}
 		// 3297
-		double distanceFromTarget = 3329.5 / rectHeight;
+		double distanceFromTarget = 3313.925 / rectHeight;
 		double OFFSET_TO_FRONT = 0;
 		return distanceFromTarget - OFFSET_TO_FRONT;
 	}
@@ -471,7 +488,7 @@ public class loadImg {
 		// if (anglePercent > 89.99) {
 		// return 90;
 		// }
-//		anglePercent /= 1.016;
+		anglePercent /= 1.016;
 
 		if (anglePercent >= 1) {
 			System.out.println("Shortened: " + anglePercent);
@@ -479,14 +496,14 @@ public class loadImg {
 		}
 		// System.out.println("Real Angle: " +
 		// Math.toDegrees(Math.asin(anglePercent)));
-		System.out.println("Angle Percent: " + anglePercent);
+//		System.out.println("Angle Percent: " + anglePercent);
 		return anglePercent * 90;
 	}
 
 	public static double newHyp(double currentTheta, double currentHyp) {
 		if (currentTheta > 90) {
 			currentTheta = currentTheta - ((currentTheta - 90) * 2);
-			System.out.println(currentTheta);
+//			System.out.println(currentTheta);
 		}
 		return Math.sqrt(Math.pow(((Math.tan(currentTheta) * Math.cos(currentTheta) * currentHyp) - SET_LENGTH), 2)
 				- Math.pow(Math.cos(currentTheta) * currentHyp, 2));
@@ -500,8 +517,8 @@ public class loadImg {
 		double newOpp = currentOpp - SET_LENGTH;
 		double newHyp = Math.sqrt(Math.pow(currentAdj, 2) + Math.pow(newOpp, 2));
 		double newTheta = Math.toDegrees(Math.asin(newOpp / newHyp));
-		System.out.println("New Theta: " + newTheta);
-		System.out.println("New Hyp: " + newHyp);
+//		System.out.println("New Theta: " + newTheta);
+//		System.out.println("New Hyp: " + newHyp);
 		return newTheta;
 	}
 
@@ -518,16 +535,16 @@ public class loadImg {
 		}
 		// System.out.println("Half Width: " + ((double) CAMERA_WIDTH / 2));
 
-		System.out.println("Angle: " + 90 * leftCenter / rightCenter);
+//		System.out.println("Angle: " + 90getAngleForReal * leftCenter / rightCenter);
 		return 90 * leftCenter / rightCenter;
 	}
 
 	public static double getOffsetDistance(double distance, double angle) {
-		System.out.println("Distance: " + distance);
-		System.out.println("Angle: " + Math.toRadians(angle));
+//		System.out.println("Distance: " + distance);
+//		System.out.println("Angle: " + Math.toRadians(angle));
 		double hypLength = Math.sqrt(Math.pow(distance, 2) + Math.pow(CAMERA_OFFSET, 2)
 				- (2 * distance * CAMERA_OFFSET * Math.cos(Math.toRadians(angle))));
-		System.out.println("New Offset Hyp Length: " + hypLength);
+//		System.out.println("New Offset Hyp Length: " + hypLength);
 		return hypLength;
 	}
 
@@ -544,6 +561,7 @@ public class loadImg {
 		return adjustedAngle;
 	}
 
+	// TODO find out what it does
 	public static double getAngleForReal(Rect left, Rect right) {
 		double leftCenter = left.x + (left.width / 2);
 		double rightCenter = right.x + (right.width / 2);

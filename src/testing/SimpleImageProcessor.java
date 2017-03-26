@@ -32,6 +32,9 @@ public class SimpleImageProcessor implements ImageProcessor {
 	static final double[] hue = { 110, 120 };
 	static final double[] saturation = { 230, 260 };
 	static final double[] luminance = { 110, 140 };
+//	static final double[] hue = { 5, 35 };
+//	static final double[] saturation = { 0, 8 };
+//	static final double[] luminance = { 70, 130 };
 	static final int defaultMinArea = 10;
 	static final int defaultMaxArea = 199999;
 	static final int defaultMinWidth = 5;
